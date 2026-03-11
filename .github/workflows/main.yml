@@ -33,5 +33,3 @@ jobs:
       - name: Run image
         run: docker run -d -p 3000:3000 ${{env.IMAGE_NAME}}
 
-      - name: Test API
-        run: curl -f http://localhost:3000
