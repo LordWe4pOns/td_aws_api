@@ -7,6 +7,7 @@ on:
 
 env:
   IMAGE_NAME: master_node_app
+  REPO_URL: ghcr.io
 
 jobs:
   test:
@@ -21,7 +22,7 @@ jobs:
 
   build:
     needs: test
-    name: Build
+    name: Build push
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -32,4 +33,22 @@ jobs:
 
       - name: Run image
         run: docker run -d -p 3000:3000 ${{env.IMAGE_NAME}}
+      
+      - name: Tag image v1.0
+        run: docker tag ${{env.IMAGE_NAME}}:1.0 ${{env.REPO_URL}}/${{github.actor}}/${{env.IMAGE_NAME}}:1.0
 
+      - name: Tag image latest
+        run: docker tag ${{env.IMAGE_NAME}}:latest ${{env.REPO_URL}}/${{github.actor}}/${{env.IMAGE_NAME}}:latest
+
+      - name : Connexion a GHCR
+        uses: docker/login-action@v2
+        with:
+          registry: ${{env.REPO_URL}}
+          username: ${{ github.actor }}
+          password: ${{ secrets.CICDTOKEN }}
+
+      - name: Push image v1.0
+        run: docker push ${{env.REPO_URL}}/${{github.actor}}/${{env.IMAGE_NAME}}:1.0
+
+      - name: Push image latest
+        run: docker push ${{env.REPO_URL}}/${{github.actor}}/${{env.IMAGE_NAME}}:latest
